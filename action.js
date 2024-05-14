@@ -1,6 +1,193 @@
 
-// add_employee...............
+// search...
 
+var search_input = document.getElementById('search_input');
+search_input.addEventListener("input", () => {
+    fetchData();
+})
+
+function displayTablerows() {
+
+    let querry = search_input.value;
+    console.log(querry);
+
+
+    let index = array.filter((eventData) => {
+        if (querry === '') {
+            return eventData
+        }
+        else if (eventData.salutation.toLowerCase().includes(querry)) {
+            return eventData
+        }
+        else if (eventData.firstName.toLowerCase().includes(querry)) {
+            return eventData
+        }
+        else if (eventData.lastName.toLowerCase().includes(querry)) {
+            return eventData
+        }
+        else if (eventData.email.toLowerCase().includes(querry)) {
+            return eventData
+        }
+        else if (eventData.phone.toLowerCase().includes(querry)) {
+            return eventData
+        }
+        else if (eventData.gender.toLowerCase().includes(querry)) {
+            return eventData
+        }
+        else if (eventData.dob.toLowerCase().includes(querry)) {
+            return eventData
+        }
+        else if (eventData.country.toLowerCase().includes(querry)) {
+            return eventData
+        }
+        // 
+
+    }).slice((start_index - 1), end_index)
+    let s = start_index;
+    let tableData = "";
+    index.map((values) => {
+        // console.log(`${values.id}` + "ksdgkhsdbvjsdbvlkj")
+        tableData += `<tr>
+            <td>#0${s++}</td>
+            <td> <img class="uploading" src="http://localhost:3000/employees/${values.id}/avatar">${values.salutation} ${values.firstName} ${values.lastName}</td>
+            <td>${values.email}</td>
+            <td>${values.phone}</td>
+            <td>${values.gender}</td>
+            <td>${values.dob}</td>
+            <td>${values.country}</td>
+            <td><div class="dropdown">
+            <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-ellipsis"></i>
+            </button>
+            <ul class="dropdown-menu">
+            
+            <li onclick="view_Employee('${values.id}')"><a class="dropdown-item" href="read.html?id=${values.id}"><i class="fa-solid fa-eye"></i>  View Details</a></li>
+              <li onclick="edit_Employee('${values.id}')"><a class="dropdown-item" href="#"><i class="fa-solid fa-pen"></i>  Edit </a></li>
+              <li onclick="delete_Employee('${values.id}')"><a class="dropdown-item" href="#"><i class="fa-solid fa-trash"></i>  Delete</a></li>
+            </ul>
+          </div>
+        </td>
+      </tr>`
+    });
+    document.getElementById("table_body").innerHTML = tableData;
+
+}
+
+
+function next() {
+    array_length = array.length;
+    console.log("array length " + array_length);
+    max_index = array_length / table_size;
+    if (current_index >= 1 & current_index < max_index) {
+        current_index++;
+        highlightIndexButton();
+    }
+}
+
+
+function prev() {
+    if (current_index > 1) {
+        current_index--;
+        highlightIndexButton();
+    }
+}
+
+
+function indexPagenation(index) {
+    current_index = parseInt(index);
+    highlightIndexButton();
+
+}
+
+
+let topPagenation = document.getElementById('table_size')
+topPagenation.addEventListener('change', () => {
+    table_size = topPagenation.value;
+    table_size = parseInt(table_size);
+    console.log("top", table_size);
+    current_index = 1;
+    start_index = 1;
+    displayIndexButtons();
+})
+
+
+// pagination.......................
+
+
+var array_length = 0;
+var table_size = 5;
+var start_index = 1;
+var end_index = 0;
+var current_index = 1;
+var max_index = 0;
+
+let array = [];
+
+fetchData();
+function fetchData() {
+    fetch(`http://localhost:3000/employees`)
+        .then((data) => {
+            // console.log(data);
+            return data.json();
+        })
+        .then((empData) => {
+            array = empData.reverse();
+            // console.log(array);
+            // const len = empData
+            displayIndexButtons()
+        })
+
+
+}
+
+
+
+function preLoadCalculation() {
+    array_length = array.length;
+    // console.log("array length " + array_length);
+    max_index = array_length / table_size;
+    if ((array_length % table_size) > 0) {
+        max_index++;
+    }
+
+
+}
+
+
+function displayIndexButtons() {
+    preLoadCalculation();
+    $(".index_button button").remove();
+    $(".index_button ").append('<button onclick="prev();"><<</button>');
+    for (var i = 1; i <= max_index; i++) {
+        $(".index_button ").append('<button onclick="indexPagenation(' + i + ');" index="' + i + '">' + i + '</button>');
+    }
+    $(".index_button ").append('<button onclick="next();">>></button>');
+    for (var i = 0; i >= array_length; i--) {
+        $(".index_button ").append('<button onclick="indexPagenation(' - i - ');" index="' - i - '">' - i - '</button>');
+    }
+    highlightIndexButton(array);
+}
+
+
+
+function highlightIndexButton() {
+    start_index = ((current_index - 1) * table_size) + 1;
+    end_index = (start_index + table_size) - 1
+    if (end_index > array_length) {
+        // console.log("length", array_length);
+        end_index = array_length;
+    }
+
+    $(".select_page span").text("of" + "   " + array_length);
+    $(".index-button button").removeClass('active');
+    $(".index_button button[index='" + current_index + "']").addClass('active');
+
+    displayTablerows();
+}
+
+
+
+// add_employee...............
 
 
 
@@ -137,36 +324,42 @@ function addValidation() {
 
     if (qualifications == "") {
         document.getElementById('addQualificationerror').textContent = "*Please fill the field"
+        Valid =false;
 
     }
 
     if (address == "") {
         document.getElementById('addAddresserror').textContent = "*Please fill the field"
-
+        Valid =false;
     }
 
     if (country == "" || country == "Select") {
         document.getElementById('addCountryerror').textContent = "*please fill the field"
+        Valid =false;
     }
     if (state == "" || state == "Select") {
         document.getElementById('addStateerror').textContent = "*please fill the field"
+        Valid =false;
     }
 
     if (city == "") {
         document.getElementById('addCityerror').textContent = "*please fill the field"
+        Valid =false;
     }
 
     if (pin == "") {
         document.getElementById('addPinerror').textContent = "*please fill the field"
+        Valid =false;
     }
 
     if (username == "") {
         document.getElementById('addUsernameerror').textContent = "*please fill the field"
+        Valid =false;
     }
 
     if (password == "") {
         document.getElementById('addPassworderror').textContent = "*please fill the field"
-        Valid = false
+        Valid = false;
     }
 
     // validation of text event....
@@ -370,6 +563,7 @@ inputfile.onchange = function () {
 
 
 
+
 // editemployeee...........>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -402,8 +596,8 @@ function Editclosefunction() {
 // add_image. of edit.............
 
 
-let b = document.getElementById('image_editupload')
-b.addEventListener('click', () => {
+let edit_imagedp = document.getElementById('image_editupload')
+edit_imagedp.addEventListener('click', () => {
 
     let profilEditepic = document.getElementById("upload_editimage");
     let inputEditfile = document.getElementById("input_Fileedit");
@@ -462,6 +656,11 @@ function edit_Employee(empid) {
         })
     // image preview 
 
+
+    const editpreview = document.getElementById(`input_Fileedit`);
+    editpreview.src = `http://localhost:3000/employees/${empid}/avatar`
+
+
     const edit_employeeBtn = document.getElementById('updateEmployee');
     function clickHandler() {
         const validation = editValidation();
@@ -473,6 +672,8 @@ function edit_Employee(empid) {
             edit_employeeBtn.removeEventListener('click', clickHandler);
             console.log('removed')
         }
+
+        
     }
     edit_employeeBtn.addEventListener('click', clickHandler);
     
@@ -482,9 +683,7 @@ function edit_Employee(empid) {
     ClearEditform()
     
     
-      
-
-}
+   }
 function image_preview() {
     const imgPreview = document.getElementById("input_Fileedit");
     imgPreview.src = URL.createObjectURL(event.target.files[0]);
@@ -709,7 +908,7 @@ function saveChanges(empid) {
             var formdata = new FormData();
             formdata.append("avatar", inputfile.files[0]);
             fetch(`http://localhost:3000/employees/${empid}/avatar`, {
-                method: "POST",
+                method: "post",
                 body: formdata,
             })
                 .then((response) => {
@@ -722,11 +921,15 @@ function saveChanges(empid) {
         })
         .then(() => {
             fetchData()
+            Editcancelfunction()
+            
          })
         .catch((error) => {
             console.error("Error occurred:", error);
         });
-        Editclosefunction()
+
+        
+       
 
 }
 
@@ -794,190 +997,4 @@ function Deletecancelfunction() {
 
 }
 
-
-
-// pagination.......................
-
-
-var array_length = 0;
-var table_size = 6;
-var start_index = 1;
-var end_index = 0;
-var current_index = 1;
-var max_index = 0;
-
-let array = [];
-
-fetchData();
-function fetchData() {
-    fetch(`http://localhost:3000/employees`)
-        .then((data) => {
-            // console.log(data);
-            return data.json();
-        })
-        .then((empData) => {
-            array = empData.reverse();
-            // console.log(array);
-            // const len = empData
-            displayIndexButtons()
-        })
-
-
-}
-
-
-
-function preLoadCalculation() {
-    array_length = array.length;
-    // console.log("array length " + array_length);
-    max_index = array_length / table_size;
-    if ((array_length % table_size) > 0) {
-        max_index++;
-    }
-
-
-}
-
-
-function displayIndexButtons() {
-    preLoadCalculation();
-    $(".index_button button").remove();
-    $(".index_button ").append('<button onclick="prev();"><<</button>');
-    for (var i = 1; i <= max_index; i++) {
-        $(".index_button ").append('<button onclick="indexPagenation(' + i + ');" index="' + i + '">' + i + '</button>');
-    }
-    $(".index_button ").append('<button onclick="next();">>></button>');
-    for (var i = 0; i >= array_length; i--) {
-        $(".index_button ").append('<button onclick="indexPagenation(' - i - ');" index="' - i - '">' - i - '</button>');
-    }
-    highlightIndexButton(array);
-}
-
-
-
-function highlightIndexButton() {
-    start_index = ((current_index - 1) * table_size) + 1;
-    end_index = (start_index + table_size) - 1
-    if (end_index > array_length) {
-        // console.log("length", array_length);
-        end_index = array_length;
-    }
-
-    $(".select_page span").text("of" + "   " + array_length);
-    $(".index-button button").removeClass('active');
-    $(".index_button button[index='" + current_index + "']").addClass('active');
-
-    displayTablerows();
-}
-
-
-
-// search...
-
-var search_input = document.getElementById('search_input');
-search_input.addEventListener("input", () => {
-    fetchData();
-})
-
-function displayTablerows() {
-
-    let querry = search_input.value;
-    console.log(querry);
-
-
-    let index = array.slice((start_index - 1), end_index)
-    let s = start_index;
-    let tableData = "";
-    index.filter((eventData) => {
-        if (querry === '') {
-            return eventData
-        }
-        else if (eventData.salutation.toLowerCase().includes(querry)) {
-            return eventData
-        }
-        else if (eventData.firstName.toLowerCase().includes(querry)) {
-            return eventData
-        }
-        else if (eventData.lastName.toLowerCase().includes(querry)) {
-            return eventData
-        }
-        else if (eventData.email.toLowerCase().includes(querry)) {
-            return eventData
-        }
-        else if (eventData.phone.toLowerCase().includes(querry)) {
-            return eventData
-        }
-        else if (eventData.gender.toLowerCase().includes(querry)) {
-            return eventData
-        }
-        else if (eventData.dob.toLowerCase().includes(querry)) {
-            return eventData
-        }
-        else if (eventData.country.toLowerCase().includes(querry)) {
-            return eventData
-        }
-    }).map((values) => {
-        tableData += `<tr>
-            <td>#0${s++}</td>
-            
-            <td><img class="uploading" src="http://localhost:3000/employees/${values.id}/avatar">${values.salutation} ${values.firstName} ${values.lastName}</td>
-            <td>${values.email}</td>
-            <td>${values.phone}</td>
-            <td>${values.gender}</td>
-            <td>${values.dob}</td>
-            <td>${values.country}</td>
-            <td><div class="dropdown">
-            <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-ellipsis"></i>
-            </button>
-            <ul class="dropdown-menu">
-            
-            <li onclick="view_Employee('${values.id}')"><a class="dropdown-item" href="read.html?id=${values.id}"><i class="fa-solid fa-eye"></i>  View Details</a></li>
-              <li onclick="edit_Employee('${values.id}')"><a class="dropdown-item" href="#"><i class="fa-solid fa-pen"></i>  Edit </a></li>
-              <li onclick="delete_Employee('${values.id}')"><a class="dropdown-item" href="#"><i class="fa-solid fa-trash"></i>  Delete</a></li>
-            </ul>
-          </div>
-        </td>
-      </tr>`
-    });
-    document.getElementById("table_body").innerHTML = tableData;
-
-}
-
-
-function next() {
-    array_length = array.length;
-    console.log("array length " + array_length);
-    max_index = array_length / table_size;
-    if (current_index >= 1 & current_index < max_index) {
-        current_index++;
-        highlightIndexButton();
-    }
-}
-
-
-function prev() {
-    if (current_index > 1) {
-        current_index--;
-        highlightIndexButton();
-    }
-}
-
-
-function indexPagenation(index) {
-    current_index = parseInt(index);
-    highlightIndexButton();
-
-}
-
-
-let topPagenation = document.getElementById('table_size')
-topPagenation.addEventListener('change', () => {
-    table_size = topPagenation.value;
-    table_size = parseInt(table_size);
-    console.log("top", table_size);
-    current_index = 1;
-    start_index = 1;
-    displayIndexButtons();
-})
 
